@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox Facts par Mohamed GAIGI (Nekros00).">
+<title>Facts · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>Facts</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260417115631.png" /><br />
+3 ports ouvert : 22, 80, 54321 (port non ouvert vers l'extérieur)</p>
+<p>Le site web sur le port 80 :<br />
+<img alt="" src="img/Pasted_image_20260417115813.png" /></p>
+<p>j'ai lancé cette commande avec l'outil gobuster pour voir les repot actif du site : <br />
+<img alt="" src="img/Pasted_image_20260417121138.png" /></p>
+<p>mais j'ai eu beaucoup de faux positifs car ils ont quasiment tous la même taille ça veut dire quand je recherche .passwd je vais juste atterrir sur la page d'accueil du site, exemple : <br />
+<img alt="" src="img/Pasted_image_20260417121351.png" /></p>
+<p>les repots les plus importants : <br />
+<img alt="" src="img/Pasted_image_20260417121208.png" /><br />
+<img alt="" src="img/Pasted_image_20260417121458.png" /></p>
+<p>quand on recherche 'robots.txt', aucun résultat intéressant mais quand on recherche 'robots' on a le lien du sitemap : <br />
+<img alt="" src="img/Pasted_image_20260417121656.png" /><br />
+la page sqlmap ne donne rien d'intéressant</p>
+<p>je décide visiter la pageweb /admin et j'ai vu qu'on pouvait crée un utilisateur<br />
+<img alt="" src="img/Pasted_image_20260417122549.png" /></p>
+<p>la page pour créer un utilisateur<br />
+<img alt="" src="img/Pasted_image_20260417122402.png" /></p>
+<p>Après la création j'ai pu me co a mon compte : <br />
+<img alt="" src="img/Pasted_image_20260417122950.png" /><br />
+le site web utilise cette version de Camaleon : <br />
+<img alt="" src="img/Pasted_image_20260417131944.png" /><br />
+j'ai trouvé cette CVE (CVE-2025-2304) : <br />
+<img alt="" src="img/Pasted_image_20260417172309.png" /></p>
+<p>j'ai trouvé un POC pour exploiter cette CVE, lien du POC : https://github.com/whiteov3rflow/CVE-2025-2304-POC/tree/main?tab=readme-ov-file</p>
+<p>j'ai lancé le script du POC :<br />
+<img alt="" src="img/Pasted_image_20260417172435.png" /></p>
+<p>le résultat : <br />
+<img alt="" src="img/Pasted_image_20260417172533.png" /><br />
+maintenant j'ai accès au Panel admin </p>
+<p>j'ai trouvé un autre poc sur internet qui en plus de te donner le rôle admin fait plus de trucs <br />
+lien du poc : https://github.com/Alien0ne/CVE-2025-2304/tree/main#</p>
+<p><img alt="" src="img/Pasted_image_20260418122321.png" /><br />
+la 1re fonction : je passe du rôle client au rôle d'admin (Privilege Escalation), grâce a la fonction 'updated_ajax' qui a été mal configuré car le dev a utilisé "permit!" (en ruby ça signifie : Désactive toutes les sécurités et accepte tous les paramètres que l'utilisateur m'envoie)<br />
+la 2e fonction (-e): extrait les credentiels S3 (ce site web utilise l'objet de stockage MinIO qui a  une API compatible avec Amazon S3)<br />
+la 3e fonction (-r) : me remettre le rôle client pour éviter qu'un vrai admin ne se rende compte que je me suis donné les droits admin <br />
+<img alt="" src="img/Pasted_image_20260418124107.png" /><br />
+Mettre à jour la configuration aws avec les credentiels que je viens de voler de la part du serveur, pour pouvoir me faire passer pour me faire passer pour le site web car le dev n'a pas strictement interdit l'accès depuis l'extérieur a son MinIO (c'est pour ça j'ai pu voir le port ouvert avec mon nmap) </p>
+<p>navigation sur son serveur : <br />
+<img alt="" src="img/Pasted_image_20260418130423.png" /><br />
+<img alt="" src="img/Pasted_image_20260418130438.png" /><br />
+<img alt="" src="img/Pasted_image_20260418130453.png" /></p>
+<p>Upload du fichier id sur mon répertoire actuel <br />
+<img alt="" src="img/Pasted_image_20260418130823.png" /></p>
+<p>je restreins les droits pour que je puisse être le seul a pouvoir la lire sinon ssh va refuser de l'utiliser si je la laisse avec des droits de lecture trop permissifs <br />
+<img alt="" src="img/Pasted_image_20260418130921.png" /></p>
+<p>j'ai pu avoir tout les utilisateurs du serveur avec une requête GET sur Burp :<br />
+<img alt="" src="img/Screenshot_2026-04-17_131916.png" /></p>
+<p>j'ai essayé de me co avec les deux utilisateurs avec le fichier que j'ai upload : <br />
+<img alt="" src="img/Pasted_image_20260418132028.png" /><br />
+pour l'utilisateur Willian le terminal ne reconnaît pas le fichier mais pour l'utilisateur Trivia le terminal le reconnaît mais me demande un passphrase, car l'utilisateur la protégé avec un passphrase </p>
+<p>ssh2john c'est pour générer un hash pour jhontherripper et qu'il puisse le décrypter <br />
+<img alt="" src="img/Pasted_image_20260418140942.png" /><br />
+donc le passphrase de Trivia est 'dragonballz'</p>
+<p>récupération du flag user <br />
+<img alt="" src="img/Pasted_image_20260418141243.png" /></p>
+<p>Analyse des droits de l'utilisateur Trivia sur la machine : <br />
+<img alt="" src="img/Pasted_image_20260418141757.png" /><br />
+notre utilisateur a le droit d'exécuter la programme facter sans mdp</p>
+<p><img alt="" src="img/Pasted_image_20260418143514.png" /><br />
+je vais dans le fichier dossier '/tmp', je crée un fichier 'exploit.rb' pour ordonner a remplacer le programme en cours par un shell 'bin/bash' et dernière étape déclenche le piège pour obliger facter a chercher ses scripts dans le dossier '/tmp' où l'ont vient de poser notre exploit</p>
+<p>le shell root se déclenche après la dernière commande et j'ai pu récupérer le flag root <br />
+<img alt="" src="img/Pasted_image_20260418143959.png" /><br />
+<img alt="" src="img/Pasted_image_20260418144015.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

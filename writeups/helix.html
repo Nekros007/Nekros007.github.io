@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox Helix par Mohamed GAIGI (Nekros00).">
+<title>Helix · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>Helix</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260510005519.png" /></p>
+<p>on voit que 2 ports ouvert, le port 22 et le port 80 (http)</p>
+<p>Je modifie mon fichier /etc/hosts, pour pourvoir aller sur le site <br />
+<img alt="" src="img/Pasted_image_20260510011632.png" /></p>
+<p>Aucune réponse concluante avec ffuze pour rechercher les sous domaines : <br />
+<img alt="" src="img/Pasted_image_20260512215330.png" /><br />
+pour cette capture on a utilisé cette commande : <br />
+<strong>"ffuf -w ~/wordlists/medium.txt -u http://helix.htb/FUZZ -fc 404 -fs 43341 -ic -c"</strong> (ignorer les 404 et tous les sous domaines qui font 4331 octets car les faux positifs me raménent sur la page d'acceuil qui fait cette taille), avec cette commande <strong>j'ai fais du Directory fuzzing (/FUZZ) chercher des chemins sur le serveur</strong></p>
+<p>et juste après j'ai essayé cette commande <strong>"ffuf -w ~/wordlists/medium.txt -u http://helix.htb/ -H "Host: FUZZ.helix.htb" -ac -c"</strong>, avec cette commande <strong>j'ai fais du VHost fuzzing (FUZZ.helix.htb) chercher des identités sur le même serveur</strong> <br />
+<img alt="" src="img/Pasted_image_20260512221357.png" /></p>
+<p>Quand j'ai essayé d'aller sur ce lien <strong>flow.helix.htb</strong> j'ai été redirigée sur cette page : <br />
+<img alt="" src="img/Pasted_image_20260512224526.png" /><br />
+<strong>Nifi permet de crée des processus qui manipulent des fichiers, exécutent des scripts ou gérent des données.</strong></p>
+<p>En naviguant sur le site j'ai trouvé la version de Nifi : <br />
+<img alt="" src="img/Pasted_image_20260512230646.png" /></p>
+<p>j'ai trouvé une CVE (CVE-2023-34468) décrit sur le site du NIST : <br />
+<img alt="" src="img/Pasted_image_20260512232826.png" /></p>
+<p>Un poc qui exploite cette cve : <br />
+ https://github.com/Al3xx-sec/CVE-2023-34468-POC/tree/main</p>
+<p>Ce poc exploite une instance NiFi via une injection dans les services de connexion aux bases de données (<strong>DBCPConnectionPool</strong>).</p>
+<p>chaîne d'attaque du poc : <br />
+1- Création d'un connecteur avec un driver <strong>H2</strong>.<br />
+2- Utilisation de <code>RUNSCRIPT FROM</code> pour forcer NiFi à télécharger un script SQL malveillant sur ma machine.<br />
+3- Le script SQL définit un <code>ALIAS</code> Java qui exécute des commandes système (<strong>RCE</strong>).<br />
+4- Déclenchement via un processeur <code>ExecuteSQL</code> pour obtenir le <strong>Reverse Shell</strong>.</p>
+<p>je clone le repot :<br />
+<img alt="" src="img/Pasted_image_20260512233400.png" /></p>
+<p>je pars dans le repot que je viens de cloner : <br />
+<img alt="" src="img/Pasted_image_20260512234533.png" /><br />
+je lance le script : <br />
+<img alt="" src="img/Pasted_image_20260512234600.png" /><br />
+sur mon port d'écoute : <br />
+<img alt="" src="img/Pasted_image_20260512234714.png" /></p>
+<p>je suis partis dans le dossier conf et j'ai fait cette commande pour chercher si y a des mot de passe stockés ou non <br />
+<img alt="" src="img/Pasted_image_20260513135636.png" /><br />
+<strong>-r : (recursive) pour chercher dans les dossiers et sous dossiers <br />
+-i : (Ignore Case), il s'en fiche des majuscules et minuscules<br />
+-E : (Extended Regex), permettre l'utilisation du symbole '|'<br />
+-2&gt;/dev/null : (j'ai bien tapé ça, problème avec bash), masqué les erreurs</strong><br />
+<img alt="" src="img/Pasted_image_20260513140238.png" /><br />
+la seul ligne intéressante du résultat, cette clé va nous servir de déchiffrer les mdp si on en trouve un </p>
+<p>dans /opt on trouve 2 utilisateurs mais je ne peux aller dans le répertoires de l'utilisateur Helix, et j'ai regardé ce répertoire appartient au groupe <strong>helixsvc</strong><br />
+<img alt="" src="img/Pasted_image_20260513140749.png" /><br />
+<strong>-l :(Long) : Affiche le format détaillé (permissions, propriétaires, taille, date).<br />
+ -d :(Directory): Indique à <code>ls</code> de nous montrer les infos du dossier lui-même (<code>/opt/helix</code>), et non pas de lister les fichiers qui sont à l'intérieur.</strong> <br />
+donc d'après le résultat root a le droit de tout faire faire et le groupe helixsvc a le droit de lire et d'entrer dans ce dossier <br />
+je suis parti dans le répertoire /home mais je vois qu'un seul utilisateur <strong>operator</strong> et je ne peux pas accéder a son répertoire <br />
+<img alt="" src="img/Pasted_image_20260513141636.png" />plus d'informations sur l'utilisateur operator : <br />
+<img alt="" src="img/Pasted_image_20260513141901.png" /><br />
+je reviens dans le dossier conf et j'ouvre un serveur pour récupérer le fichier flow.xml.gz<br />
+<img alt="" src="img/Pasted_image_20260513142638.png" /><br />
+<img alt="" src="img/Pasted_image_20260513142834.png" /></p>
+<p>le fichier est bien dans mon répertoire : <br />
+<img alt="" src="img/Pasted_image_20260513142902.png" /></p>
+<p>dans ce fichier j'ai trouvé le password d'operator chiffré : <br />
+<img alt="" src="img/Pasted_image_20260513190836.png" /></p>
+<p>En naviguant dans la session de nifi j'ai trouvé ce fichier : <br />
+<img alt="" src="img/Pasted_image_20260514003056.png" /><br />
+le contenu du fichier : <br />
+<img alt="" src="img/Pasted_image_20260514003135.png" /></p>
+<p>j'ai créé un fichier dans sur ma session pour copier la clé privé open ssh : <br />
+<img alt="" src="img/Pasted_image_20260514003751.png" /><br />
+j'ai mis la clé privé lisible juste par moi pour que ssh l'accepte :<br />
+<img alt="" src="img/Pasted_image_20260514003827.png" /></p>
+<p>donc j'ai pu copier le flag user : <br />
+<img alt="" src="img/Pasted_image_20260514004006.png" /></p>
+<p>vérification si j'ai des droits particulier : <br />
+<img alt="" src="img/Pasted_image_20260514004447.png" /><br />
+j'ai les droit en tant que root d'exécuter ce binaire donc sudo sans mdp </p>
+<p>j'ai ouvert un serveur dans la session d'operator : <br />
+<img alt="" src="img/Pasted_image_20260514184957.png" /></p>
+<p>je suis partie sur ce serveur pour récupérer les fichiers qui sont dans le répertoire personnel : <br />
+<img alt="" src="img/Pasted_image_20260514185116.png" /><br />
+le png : <br />
+<img alt="" src="img/Pasted_image_20260514185149.png" /><br />
+le pdf : <br />
+<img alt="" src="img/Pasted_image_20260514185205.png" /></p>
+<p>je vais essayer de cracker le mdp avec john :<br />
+<img alt="" src="img/Pasted_image_20260514192924.png" /><br />
+je récupère le hash du fichier pour le cracker avec john<br />
+<img alt="" src="img/Pasted_image_20260514193053.png" /><br />
+le mdp du pdf est <strong>operator1</strong><br />
+<img alt="" src="img/Pasted_image_20260514193135.png" /><br />
+ce document nous explique concrétement comment débloquer l'acccés root </p>
+<p>quand j'ai ouvert le serveur http j'ai aussi trouvé ces fichiers dans le répertoires ssh : <br />
+<img alt="" src="img/Pasted_image_20260515001525.png" /></p>
+<p>après m'être bloqué longtemps sur ce challenge j'ai relu le png et le pdf, et j'ai cherché sur internet : <br />
+<strong>OPC UA CLIENT</strong> et j'ai trouvé ce repot github qui te montre comment installer l'outil : https://github.com/FreeOpcUa/opcua-client-gui<br />
+<img alt="" src="img/Pasted_image_20260516003449.png" /><br />
+je le lance : <br />
+<img alt="" src="img/Pasted_image_20260516003557.png" /><br />
+j'ai eu ça après l'avoir lancé <br />
+<img alt="" src="img/Pasted_image_20260516003625.png" /><br />
+entre temps j'ai lancé cette commande : <br />
+<img alt="" src="img/Pasted_image_20260516003800.png" /><br />
+pour faire un rebond et avoir ce que operator a en local sur son port 4840 moi je vais l'avoir en local sur mon port 9999</p>
+<p>Tous les ports ouvert dans la session d'operator : <br />
+<img alt="" src="img/Pasted_image_20260516005823.png" /><br />
+contrôle du port 8080 : <br />
+<img alt="" src="img/Pasted_image_20260516010436.png" /><br />
+mais c'est juste le port qui héberge l'instance locale d'Apache NIFI <br />
+contrôle du port 8081 : <br />
+<img alt="" src="img/Pasted_image_20260516010756.png" /><br />
+c'est une redirection : <br />
+<img alt="" src="img/Pasted_image_20260516010904.png" /><br />
+vérification de le redirection : <br />
+<img alt="" src="img/Pasted_image_20260516010946.png" /><br />
+<strong>-L</strong> : pour suivre la redirection <br />
+dans le résultat de la commande on voit que c'est le panel du réacteur : <br />
+<img alt="" src="img/Pasted_image_20260516011050.png" /></p>
+<p>j'exécute un rebond sur sont port 8081 pur que je puisse le voir sur ma session : <br />
+<img alt="" src="img/Pasted_image_20260516011524.png" /><br />
+c'est bien le panel du réacteur : <br />
+<img alt="" src="img/Pasted_image_20260516011635.png" /></p>
+<p>on ne peut pas modifier les attributs dans opcua-client donc j'ai trouvé ce repot github pour pouvoir modifier les attributs et passer en root : <br />
+le attributs que je dois modifié (trouvé dans le pdf)<br />
+<img alt="" src="img/Pasted_image_20260517130719.png" /><br />
+le repot : https://github.com/node-opcua/opcua-commander</p>
+<p>j'ai suivis les étapes from npm pour l'installation et l'exécution du script : <br />
+<img alt="" src="img/Pasted_image_20260517154148.png" /></p>
+<p>j'ai modifié la commande pour correspondre au port ou j'ai mis le rebond: <br />
+<img alt="" src="img/Pasted_image_20260517154254.png" /><br />
+après le lance de opcua-commander j'ai du modifier les attributs : <br />
+mettre le mode en maintenance : <br />
+<img alt="" src="img/Pasted_image_20260517154347.png" /><br />
+true pour le TestOverride (il était en false donc = 0)<br />
+<img alt="" src="img/Pasted_image_20260517154421.png" /><br />
+la température était de 283.9 donc j'ai rajouté 11.5 pour dépasser les 295°C :<br />
+<img alt="" src="img/Pasted_image_20260517153021.png" /><br />
+j'ai pu exécuter cette commande que le utilisateur operator peut exécuter en tant que sans taper le mdp de root : <br />
+<img alt="" src="img/Pasted_image_20260517153113.png" /><br />
+(le résultat de la même commande avant la modfication des attributs :) <br />
+<img alt="" src="img/Pasted_image_20260517155306.png" /><br />
+j'étais bien dans la session du root donc il me restait juste a récup le flag :<br />
+<img alt="" src="img/Pasted_image_20260517153159.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

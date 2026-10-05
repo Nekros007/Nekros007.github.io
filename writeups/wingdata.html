@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox WingData par Mohamed GAIGI (Nekros00).">
+<title>WingData · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>WingData</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260406224824.png" /><br />
+on voit 2 ports ouvert le 22 et le 80</p>
+<p>on modifie le fichier hosts et on rajoute cette ligne : <br />
+10.129.24.163 wingdata.htb<br />
+<img alt="" src="img/Pasted_image_20260406225318.png" /><br />
+maintenant on peut accéder au site sur le port 80<br />
+<img alt="" src="img/Pasted_image_20260406225433.png" /><br />
+mais quand j'essaye de partir sur le "client portal", ça ne fonctionne pas</p>
+<p><img alt="" src="img/Pasted_image_20260406225216.png" /><br />
+je modifie la ligne dans fichier etc/hosts pour voir si je peux accéder au site grâce a ça </p>
+<p>maintenant ça fonctionne et on tombe sur cette page <br />
+<img alt="" src="img/Pasted_image_20260406225620.png" /><br />
+ce qui retiens mon attention c'est que le site précise la version de WingFTP donc je recherche directement si je peux trouver un exploit de cette version sur internet </p>
+<p>en cherchant je trouve cette CVE : CVE-2025-47812</p>
+<p>et ce github pour le POC : https://github.com/4m3rr0r/CVE-2025-47812-poc</p>
+<p><img alt="" src="img/Pasted_image_20260406231402.png" /><br />
+j'ai lancé le script mais comme la commande "ipconfig" ne fonctionne pas sur linux j'ai essayé cette commande :<br />
+<img alt="" src="img/Pasted_image_20260406231523.png" /><br />
+avec cette commande j'ai pu voir que je suis winftp (un utilisateur standard)</p>
+<p><img alt="" src="img/Pasted_image_20260406231713.png" /><br />
+j'ai essayé de mettre le payload directement dans la commande mais les caractéres spéciaux n'ont pas été reconnu.</p>
+<p>j'ai essayé une autre méthode, envoyé directement mon payload dans un fichier.</p>
+<p>j'ai créé un fichier shell.sh, j'ai écrit le payload dans ce fichier</p>
+<p>j'ai créé web python pour pouvoir envoyé le fichier a la machine cible : <br />
+<img alt="" src="img/Pasted_image_20260407115110.png" /><br />
+j'ai lancé mon port 4444 en écoute : <br />
+<img alt="" src="img/Pasted_image_20260407115211.png" /><br />
+et j'ai lancé cette commande : <br />
+<img alt="" src="img/Pasted_image_20260407115241.png" /></p>
+<p>après avoir lancé la dernière commande j'ai eu accées a la session de wingftp : <br />
+<img alt="" src="img/Pasted_image_20260407115359.png" /></p>
+<p>maintenant l'objectif c'est de trouver le fichier user.txt<br />
+<img alt="" src="img/Pasted_image_20260407115628.png" /><br />
+première étape quand j'arrive dans la machine, je fais "cd /home" et je trouve un répertoire avec le nom wacky et quand j'essaye d'aller dans ce répertoire je vois que je n'ai pas les permissions donc je comprends qu'il y a beaucoup de chances que le répertoire Wacky contient le fichier user.txt</p>
+<p>je vais dans le répertoire "data/1" pour voir si je trouve des des users<br />
+<img alt="" src="img/Pasted_image_20260407120045.png" /><br />
+je vois un répertoire users : <br />
+<img alt="" src="img/Pasted_image_20260407120114.png" /><br />
+je vois plusieurs utilisateurs et le fameux wacky donc j'analyse le fichier wacky.wml <br />
+<img alt="" src="img/Pasted_image_20260407120408.png" /><br />
+en analysant ce fichier je tombe sur le hash du mot de passe de wacky </p>
+<p>je crée le fichier admin.txt, je mets le hash du mdp de wacky dedans : <br />
+<img alt="" src="img/Pasted_image_20260407120532.png" /><br />
+mais quand j'essaye de décrypter le mdp avec jhontheripper, ça ne fonctionne pas je n'ai aucun résultat <br />
+donc je met dit que surement le mdp a été salted </p>
+<p>je tente de le décrypter avec hashcat en précisant que ce mdp comporte peut être du salt <br />
+<img alt="" src="img/Pasted_image_20260407120920.png" /><br />
+avec cette commande je mets directement le hash du mdp (sans passer par un fichier), et j'aide hashcat et lui dit que ce mdp comporte surement du salt de WingFTP<br />
+<img alt="" src="img/Pasted_image_20260407121054.png" /><br />
+et cette commande fonctionne, j'ai pu avoir le mdp en clair de wacky</p>
+<p>Après avoir récupéré son mdp en clair <br />
+<img alt="" src="img/Pasted_image_20260407121425.png" /><br />
+je me met les droits de wacky dans me session<br />
+<img alt="" src="img/Pasted_image_20260407121327.png" /><br />
+je reviens dans le répertoire home et j'ai récupéré le flag user dans le répertoire de wacky </p>
+<p>maintenant la première chose que je fais quand j'ai le mdp d'un user c'est de se co en ssh <br />
+<img alt="" src="img/Pasted_image_20260407121853.png" /></p>
+<p>je regarde ce que j'ai le droit d'accéder et de faire en tant que wacky <br />
+<img alt="" src="img/Pasted_image_20260407124956.png" /></p>
+<p>sur cette capture on voit qu'on peut exécuter le script qui restore le script en tant que root</p>
+<p>j'analyse le script avec cat : <br />
+<img alt="" src="img/Pasted_image_20260407141907.png" /><br />
+    ce script ne fait aucune inspection du contenu aux fichiers .tar, il fait une confiance aveugle a tarfile.</p>
+<p>je cherche sur internet et je trouve cette CVE-2025-4517 qui exploite cette faiblesse on rechargeant un poc sur github je tombe sur ce poc "https://github.com/MAVERICK-VF142/Maverick-Scripts/blob/main/HTB/WingData/privilage-escalation-WingData.py" qui exploite la faiblesse de cette machine.</p>
+<p><img alt="" src="img/Pasted_image_20260407142710.png" /><br />
+je crée le fichier et je met le script dedans et quand je lance le script je le fichier .tar a été créé et je suis devenu root <br />
+<img alt="" src="img/Pasted_image_20260407142820.png" /><br />
+confirmation que je suis bien devenu root </p>
+<p>la dernière étape a faire aller dans le répertoire root et cherche le flag root <br />
+<img alt="" src="img/Pasted_image_20260407142930.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

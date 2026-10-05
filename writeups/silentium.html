@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox Silentium par Mohamed GAIGI (Nekros00).">
+<title>Silentium · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>Silentium</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260413181244.png" /><br />
+On voit deux ports Tcp ouvert</p>
+<p>le site http://silentium.htb : <br />
+<img alt="" src="img/Pasted_image_20260413181356.png" /><img alt="" src="img/Pasted_image_20260413181508.png" /><br />
+<img alt="" src="img/Pasted_image_20260413203755.png" /><br />
+découverte d'un sous domaine caché : <br />
+<img alt="" src="img/Pasted_image_20260413181936.png" /></p>
+<p>la page web du sous domaine : <br />
+<img alt="" src="img/Pasted_image_20260413182137.png" /></p>
+<p>en analysant le code source j'ai vu que ce site web utilise l'outil open source flowise<br />
+<img alt="" src="img/Pasted_image_20260413182828.png" /></p>
+<p>la version de flowise utilisé : <br />
+<img alt="" src="img/Pasted_image_20260413182912.png" /></p>
+<p>énumération des utilisateurs : <br />
+<img alt="" src="img/Pasted_image_20260413203850.png" /><br />
+l'utilisateur admin n'existe pas </p>
+<p><img alt="" src="img/Pasted_image_20260413203911.png" /><br />
+l'utilisateur ben existe </p>
+<p>Comme l'utilisateur Ben existe, j'ai essayé de faire mdp oublié : <br />
+<img alt="" src="img/Pasted_image_20260413210333.png" /><br />
+résultat de la requête sur burp : <br />
+<img alt="" src="img/Pasted_image_20260413210413.png" /><br />
+Faille dans les API (Excessive Data Exposure) pcq sur burp on a eu toute la ligne de la bd </p>
+<p>Comme sur burp on a eu le temp token je peux changer son mdp : <br />
+<img alt="" src="img/Pasted_image_20260413210833.png" /></p>
+<p>grâce a cette manip j'ai pu accéder au compte de Ben : <br />
+<img alt="" src="img/Pasted_image_20260413210944.png" /></p>
+<p>en allant dans "API keys" sur le site web, je suis tombé sur la clé API en clair <br />
+<img alt="" src="img/Pasted_image_20260413213121.png" /></p>
+<p>Sur la page web je suis parti dans Chatflows et après j'ai rajouté le customMCP a la fin j'ai mis ce payload : <br />
+<img alt="" src="img/Pasted_image_20260414004654.png" /><br />
+et mon netcat en écoute sur le port 9001 et j'ai réussi à avoir le shell <br />
+mais directement sur la session du root..<br />
+<img alt="" src="img/Pasted_image_20260414004803.png" /></p>
+<p>du conteneur Docker <br />
+<img alt="" src="img/Pasted_image_20260414005026.png" /></p>
+<p>en naviguant dans le conteneur je suis parti dans usr/local et après j'ai voulu voir les variable d'environnement qui ont été configuéré par les dev sur ce conteneur : <br />
+<img alt="" src="img/Pasted_image_20260414010000.png" />je suis tombé sur une mine d'or j'ai pu avoir le mdp de Ben et me co en ssh <br />
+<img alt="" src="img/Pasted_image_20260414010046.png" /><img alt="" src="img/Pasted_image_20260414010100.png" /></p>
+<p>les commandes qu'on doit taper quand on arriver sur une machine et on doit faire une escalade de privilège : <br />
+<img alt="" src="img/Pasted_image_20260414011026.png" /><br />
+ "sudo -l" : aucun résultat car Ben n'a pas le droit d'utiliser sudo <br />
+"find / -type f -perm -4000 2&gt;/dev/null" : la commande pour lister les fichiers SUID (Set Owner User ID) n'a rien donné, tous les programmes listés ici sont 100% normaux et légitimes aucun programme suspect sur la capture<br />
+ "cat /etc/crontab" : on voit que des résultats de maintenance par défaut aucune tâche résultat suspect</p>
+<p>j'ai aussi cherché les ports ouvert en local <br />
+<img alt="" src="img/Pasted_image_20260414012735.png" /><br />
+et je suis tombé sur pas mal de ports intéressant <br />
+<img alt="" src="img/Pasted_image_20260414012852.png" /><br />
+en rapport avec le résultat de ma commande env quand j'étais sur docker <br />
+le port 1025 sert a recevoir les mails "en-coulisses" et le 8025 avec l'interface web, donc j'ai config une autre connexion ssh pour pouvoir lire le mail sur le port 8025<br />
+<img alt="" src="img/Pasted_image_20260414013045.png" /><img alt="" src="img/Pasted_image_20260414013058.png" /><br />
+mais malheureusement aucun résultat c'est juste les mails que j'ai envoyé moi même pour changer son mdp<br />
+on passe au port 3001 : <br />
+<img alt="" src="img/Pasted_image_20260414013432.png" /><br />
+<img alt="" src="img/Pasted_image_20260414013524.png" /><br />
+j'ai essayé de me co avec le compte de ben mais sans résulat <br />
+<img alt="" src="img/Pasted_image_20260414014304.png" /><br />
+donc je vais essayer de m'inscrire <br />
+<img alt="" src="img/Pasted_image_20260414014359.png" /></p>
+<p>je me suis inscrit et maintenant je vais crée un repot <br />
+<img alt="" src="img/Pasted_image_20260415002138.png" /><br />
+j'ai tapé cette commande pour trouver le fichier app.ini qui contient le chemins de la bd et son mot de passe </p>
+<p><img alt="" src="img/Pasted_image_20260415002158.png" /></p>
+<p>Gogs tourne avec les droit root</p>
+<p>la version de Gogs<br />
+<img alt="" src="img/Pasted_image_20260416000651.png" /></p>
+<p>j'ai trouvé cette CVE-2025-8110 pour cette version : <br />
+l'article qui parle de la CVE : https://www.darkreading.com/vulnerabilities-threats/attackers-exploited-gogs-zero-day-months<br />
+<img alt="" src="img/Pasted_image_20260416003947.png" /></p>
+<p>pour exploiter cette CVE j'ai trouvé un poc sur Github : <br />
+https://github.com/zAbuQasem/gogs-CVE-2025-8110/tree/main</p>
+<p>j'ai du modifier le script car au début ça ne fonctionné pas : <br />
+<img alt="" src="img/Pasted_image_20260416005729.png" /><br />
+le script n'arrive pas a s'enregistrer donc j'ai modifier des lignes pour que le script se connecte avec mon compte que j'ai créé car je me suis rappelé que pour s'enregistrer il y a un captcha <br />
+<img alt="" src="img/Pasted_image_20260416005932.png" /><br />
+dans Def main j'ai mis un "#" a la ligne pour s'enregistrer et j'ai modifié le username et le mdp pour que le script se co avec mon compte <br />
+<img alt="" src="img/Pasted_image_20260416010040.png" /></p>
+<p>comme me la demander la réponse du dernier screen, j'ai du taper ces commandes : <br />
+<img alt="" src="img/Pasted_image_20260416010057.png" /></p>
+<p>Après avoir mis mon adresse email et mon username le script a bien fonctionné : <br />
+<img alt="" src="img/Pasted_image_20260416011006.png" /></p>
+<p>et j'ai pu avoir le flag root : <br />
+<img alt="" src="img/Pasted_image_20260416011059.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

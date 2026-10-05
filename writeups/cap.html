@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox Cap par Mohamed GAIGI (Nekros00).">
+<title>Cap · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>Cap</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><h2>Task 1 - Scan des ports</h2>
+<p>On commence par un scan Nmap pour identifier les services exposés sur la cible :</p>
+<pre><code class="language-bash">nmap -sV -sC -p- --min-rate 5000 10.129.13.203
+</code></pre>
+<p><img alt="Scan Nmap" src="img/Pasted_image_20260325140332.png" /></p>
+<p>Le scan révèle <strong>3 ports TCP ouverts</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Service</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>21</td>
+<td>FTP</td>
+<td>vsftpd 3.0.3</td>
+</tr>
+<tr>
+<td>22</td>
+<td>SSH</td>
+<td>OpenSSH 8.2p1</td>
+</tr>
+<tr>
+<td>80</td>
+<td>HTTP</td>
+<td>Gunicorn (Security Dashboard)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Task 2 - Énumération Web &amp; Structure de l'API</h2>
+<p>En naviguant sur l'application web, on observe que les captures réseau sont accessibles via l'endpoint :</p>
+<pre><code>/data/[id]
+</code></pre>
+<p><img alt="URL /data/2" src="img/Pasted_image_20260325140444.png" /></p>
+<p>Le paramètre <code>something</code> correspond ici à <strong><code>data</code></strong>, suivi d'un identifiant numérique.</p>
+<hr />
+<h2>Task 3 - Vulnérabilité IDOR</h2>
+<p><img alt="IDOR - accès à /data/0" src="img/Pasted_image_20260325140633.png" /></p>
+<p>En modifiant manuellement l'<code>id</code> dans l'URL, on peut consulter les captures réseau appartenant à d'autres utilisateurs. Il s'agit d'une vulnérabilité <strong>IDOR</strong> (Insecure Direct Object Reference) : l'application ne vérifie pas que la ressource demandée appartient bien à l'utilisateur connecté.</p>
+<hr />
+<h2>Task 4 - Fichier PCAP intéressant</h2>
+<p><img alt="PCAP ID 0 dans Wireshark" src="img/Pasted_image_20260325140815.png" /></p>
+<p>On télécharge le fichier PCAP associé à l'<strong>ID 0</strong> et on l'ouvre dans Wireshark. Ce fichier contient des échanges via le protocole <strong>FTP</strong>, ce qui est particulièrement intéressant car FTP transmet les données en clair.</p>
+<hr />
+<h2>Task 5 - Protocole identifié</h2>
+<p>Le protocole capturé est <strong>FTP</strong> (File Transfer Protocol).</p>
+<hr />
+<h2>Task 6 - Credentials en clair</h2>
+<p><img alt="Credentials FTP en clair" src="img/Pasted_image_20260325141154.png" /></p>
+<p>En filtrant le trafic FTP dans Wireshark (<code>ftp</code> dans la barre de filtre), on voit clairement :</p>
+<ul>
+<li>Une requête <code>USER nathan</code></li>
+<li>Une requête <code>PASS Buck3tH4TF0RM3!</code></li>
+</ul>
+<p>Le mot de passe transite <strong>en clair</strong> sur le réseau. On peut donc le réutiliser pour se connecter en <strong>SSH</strong> :</p>
+<pre><code class="language-bash">ssh nathan@10.129.13.203
+# Password: Buck3tH4TF0RM3!
+</code></pre>
+<hr />
+<h2>Task 7 - Flag utilisateur</h2>
+<p><img alt="Flag user.txt" src="img/Pasted_image_20260325141324.png" /></p>
+<p>Une fois connecté en SSH en tant que <code>nathan</code>, le flag utilisateur est disponible directement dans le home directory :</p>
+<pre><code class="language-bash">cat ~/user.txt
+</code></pre>
+<hr />
+<h2>Task 8 - Élévation de privilèges : Linux Capabilities</h2>
+<p><img alt="getcap output" src="img/Pasted_image_20260325141445.png" /></p>
+<p>Pour identifier les binaires disposant de capabilities Linux particulières, on exécute :</p>
+<pre><code class="language-bash">getcap -r / 2&gt;/dev/null
+</code></pre>
+<p>On constate que <code>/usr/bin/python3.8</code> possède la capability <strong><code>cap_setuid</code></strong>. Contrairement à un simple bit SUID, cette capability permet au processus de modifier son UID de manière arbitraire - et donc de se faire passer pour root.</p>
+<hr />
+<h2>Task 9 - Exploitation &amp; accès root</h2>
+<h3>Exécution du payload</h3>
+<p><img alt="Commande Python pour setuid(0)" src="img/Pasted_image_20260325142113.png" /></p>
+<p>On exploite la capability <code>cap_setuid</code> de Python 3.8 pour passer à l'UID 0 (root) :</p>
+<pre><code class="language-bash">/usr/bin/python3.8 -c 'import os; os.setuid(0); os.system(&quot;/bin/bash&quot;)'
+</code></pre>
+<p>Cette commande utilise <code>os.setuid(0)</code> pour changer l'UID du processus à <code>0</code>, puis ouvre un shell <code>/bin/bash</code> avec ces nouveaux privilèges.</p>
+<h3>Confirmation root</h3>
+<p><img alt="whoami = root" src="img/Pasted_image_20260325142132.png" /></p>
+<p>On confirme l'accès root avec <code>whoami</code>.</p>
+<h3>Flag root</h3>
+<p><img alt="Flag root.txt" src="img/Pasted_image_20260325142202.png" /></p>
+<pre><code class="language-bash">cat /root/root.txt
+</code></pre>
+<hr />
+<h2>Résumé</h2>
+<table>
+<thead>
+<tr>
+<th>Étape</th>
+<th>Vulnérabilité</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Énumération web</td>
+<td>IDOR sur <code>/data/[id]</code></td>
+<td>Accès aux captures d'autres utilisateurs</td>
+</tr>
+<tr>
+<td>Analyse PCAP</td>
+<td>FTP en clair</td>
+<td>Récupération des credentials</td>
+</tr>
+<tr>
+<td>Accès initial</td>
+<td>Réutilisation de mot de passe</td>
+<td>Connexion SSH en tant que <code>nathan</code></td>
+</tr>
+<tr>
+<td>Privesc</td>
+<td><code>cap_setuid</code> sur Python 3.8</td>
+<td>Shell root</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Write-up rédigé dans un cadre éducatif - machine retirée de HackTheBox.</em></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

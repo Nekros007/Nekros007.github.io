@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox Logging par Mohamed GAIGI (Nekros00).">
+<title>Logging · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>Logging</h1><div class="meta"><span class="os-win">● Windows</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260421235502.png" /><br />
+On voit le port 53 (DNS), 88 (Kerberos), 389/ 636/ 3268/ 3269 (LDAP/ LDAPS), 139/ 445 (SMB, partage de fichiers Windows), 5985 (WinRM,Windows Remote Management, équivalent de ssh sur Windows) et on voit aussi le nom de la machine 'DC01' et le nom du domaine 'logging.htb'<br />
+<img alt="" src="img/Pasted_image_20260422000919.png" /><br />
+On voit aussi le port 80 (serveur web), 8530/ 8531 (ports par défaut de Windows Server Update Services, service qui distribue les maj Windows aux autres ordinateurs, vecteur d'attaque très connu)</p>
+<p>je lance l'outil NetExec pour voir mes droits de lecture et d'écritures sur les fichiers partagés <br />
+<img alt="" src="img/Pasted_image_20260422004059.png" /><br />
+Je vois que j'ai le droit de lecture sur NETLOGON et SYSVOL (partage de fichiers standards et obligatoires sur tous les Contrôleurs de Domaine Windows, ils contiennent les politiques de sécurité GPO) et aussi sur le Logs (pas un partage de fichiers par défaut l'admin l'a créé manuellement)</p>
+<p>Je lance l'outil Netexec pour voir si je peux me co avec Wimrm ou non : <br />
+<img alt="" src="img/Pasted_image_20260422010001.png" /><br />
+mauvaise nouvelle non, pas possible</p>
+<p>je lance l'outil BloodHound pour cartographier l'AD : <br />
+<img alt="" src="img/Pasted_image_20260422010448.png" /></p>
+<p>On revient au fichier partagés logs pour voir ce qu'il y a dedans : <br />
+<img alt="" src="img/Pasted_image_20260422010636.png" /><br />
+J'ai trouvé 4 fichiers mais je regarde le fichier le plus volumineux qui est 'IdentitySync_Trace_20260219.log' et pèse 8488 octets </p>
+<p>Uplaod des 4 fichiers sur ma kali :<br />
+<img alt="" src="img/Pasted_image_20260422011510.png" /></p>
+<p>dans le fichier "IdentitySync_Trace_20260219.log" on voit ça : <br />
+<img alt="" src="img/Pasted_image_20260422225009.png" /><br />
+On voit des événement infos ( des événements a survoler pour nous), mais quand on scrolle on voit un événement ERROR pour la connexion avec LDAP et quand on remonte les événements juste avant on voit que l'utilisateur  'svc_recovery' a essayé de se co avec ce mdp 'Em3rg3ncyPa(2x$)2025' a ldap</p>
+<p>je viens de vérifier si les crédentiels que je viens de choper du fichier log sont valide pour se co a leur AD :<br />
+<img alt="" src="img/Pasted_image_20260422230536.png" /><br />
+Quand j'analyse la réponse, je vois que le compte est surement dans le groupe 'protected users' donc la connexion ne peut pas se faire avec NTLM obligé qu'elle se fasse avec Kerberos.</p>
+<p>je mets a jour mon heure sur mon kali pour correspondre a la machine cible, pcq j'ai vu quand j'ai fait la commande nmap qu'il y a une diff de 7h entre ma kali et la machine cible <br />
+je regarde aussi si je peux me co au service de partage de fichier SMB (port 445) avec l'option '-k', pour préciser que cette fois si on utilisera le protocole Kerberos.<br />
+j'ai essayé de changer le mdp car je me suis dit comme l'utilsateur que j'ai eu au début avait l'année 2026 dans son mdp peut être que cet utilisateur a fait pareil et a remplacé 2025 par 2026.<br />
+<img alt="" src="img/Pasted_image_20260422231018.png" /><br />
+On analysant le résultat on voit que l'utilisateur a bien changé son mdp et on peut se co a smb</p>
+<p>c'est aussi grâce a cette étape que je me suis dit que le mdp a peut être était modifier en 2026 <br />
+<img alt="" src="img/Pasted_image_20260423132607.png" /></p>
+<p>Analyse sur BloodHound<br />
+<img alt="" src="img/Pasted_image_20260423003619.png" /><br />
+BloodHound confirme mes doutes l'utilisateur fait bien partie des "PROTECTED USERS" mais il fait aussi partie du groupe "EMERGENCY RECOVERY" qui n'est pas un goupe par défaut mais il a été créé par l'admin.</p>
+<p>Analyse du groupe "EMERGENCY RECOVERY" qui se compose d'un seul utilisateur qui est "svc_recovery"<br />
+<img alt="" src="img/Pasted_image_20260423004634.png" /></p>
+<p>Aucun chemin directe entre notre utilisateur et le domain admin <br />
+<img alt="" src="img/Pasted_image_20260423004800.png" /><br />
+Donc aucune faille de configuaration dans les droits ACL </p>
+<p>'svc_recovery' a le droit de lecture sur les mêmes dossiers partagés que 'wallace.everette' <br />
+<img alt="" src="img/Pasted_image_20260423005227.png" /></p>
+<p>je viens de repartir sur BloodHound pour voir si je n'ai pas bien analyser avant pcq je suis bloqué : <br />
+<img alt="" src="img/Pasted_image_20260423134746.png" /><br />
+Et je viens de voir que l'utilisateur 'svc_recovery' a les droit GenericWrite sur 'MSA_HEALTH$' ça veut dire que je peux modifier quasiment toutes les propriétés de ce compte</p>
+<p>Donc j'analyse l'utilisateur 'MSA_HEALTH$' et je vois ses groupes : <br />
+<img alt="" src="img/Pasted_image_20260423135016.png" /><br />
+il a appartient a ses 2 groupes : 'Remote Management' (ça veut dire qu'avec les utilisateurs de ce groupe je peux me co avec Winrm) et a 'Domain Computers'</p>
+<p>je remontre a mon termianal le chemin du TGT : <br />
+<img alt="" src="img/Pasted_image_20260423140844.png" /></p>
+<p>Grâce a la découverte de Generic write sur le compte 'MSA_HEALTH$' j'ai pu exécuter cette commande pour  pour génére une paire de clés (une publique et un privée)sur ma machine kali et de l'écrire sur le profil de MSA pour que je puisse m'authentifier a son nom<br />
+<strong>bloodyAD</strong> : c'est un couteau suisse qui permet d'envoyer des ordres d'administration directement au Contrôleur de Domaine depuis Linux. Avec ça, si j'ai les bons droits, je peux tout faire : créer un utilisateur, changer un mot de passe, donner les pleins pouvoirs à quelqu'un, ou encore modifier l'annuaire DNS de l'entreprise.<br />
+<img alt="" src="img/Pasted_image_20260423141302.png" /><br />
+je suis les étapes du résultat de la dernière commande :<br />
+<img alt="" src="img/Pasted_image_20260423142718.png" /><br />
+<img alt="" src="img/Pasted_image_20260423142734.png" /><br />
+je charge mon nv TGT en mémoire et je lance lance l'extraction du NT hash du TGT</p>
+<p>Grâce au AS-REP que j'ai reçu lors du résultat de la dernière commande : <br />
+<img alt="" src="img/Pasted_image_20260423143558.png" /><br />
+grâce à ce NT Hash je peux me co avec evil-winrm sans avoir besoin du mdp de l'utilisateur </p>
+<p>Connexion a la session de l'utilisateur msa_heatlh$ grâce au NT Hash <br />
+<img alt="" src="img/Pasted_image_20260423173444.png" /></p>
+<p>On débarque directement dans le dossiers Documents : <br />
+<img alt="" src="img/Pasted_image_20260423173844.png" /><br />
+Je vois ce script : <br />
+<img alt="" src="img/Pasted_image_20260423173958.png" /></p>
+<p>je regarde mes privilèges sur la machines : <br />
+<img alt="" src="img/Pasted_image_20260423180602.png" /><br />
+rien d'anormal</p>
+<p>j'ai aussi regardé à quelle groupe de sécurité j'appartenais : <br />
+<img alt="" src="img/Pasted_image_20260423181010.png" /><br />
+Je vois que je suis bien un compte machine pas un humain, que aussi je peux me co en distanciel (comme je le fais en ce moment), rien d'anormal aussi </p>
+<p>Je regarde les utilsiateurs que se sont déjà connectés à cette machine : <br />
+<img alt="" src="img/Pasted_image_20260423175920.png" /><br />
+je vois 2 utilisateurs intéressants : 'jaylee.clifton' et 'toby.brynleigh'</p>
+<p>J'analyse les fichiers du dossiers Program Files où je peux trouver des .exe<br />
+<img alt="" src="img/Pasted_image_20260423182247.png" /><br />
+La plupart des fichiers que je vois ici sont apparitiennent a Windows, le seul qui sort du lot c'est le fichier UpdateMonitor</p>
+<p>J'analyse le dossier caché ProgramData où les logiciels stockent leurs logs, et parfois des dossiers d'échange <br />
+<img alt="" src="img/Pasted_image_20260423182429.png" />UpdatMonitor on le revoit ici aussi </p>
+<p>Analyse des droits du fichier UpdatMonitor dans le dossier ProgramFiles : <br />
+<img alt="" src="img/Pasted_image_20260423183941.png" /><br />
+Rien d'anormal j'ai que le droit de lecture (I) et d'exécution (RX)</p>
+<p>Analyse des droits du fichier UpdatMonitor dans le dossier ProgramData :<br />
+<img alt="" src="img/Pasted_image_20260423184131.png" /><br />
+Premier ligne pour les Users j'ai le droit de lire mais quand on regarde la 2e ligne j'ai le droit de j'ai tout les droits d'écriture sur de fichier </p>
+<p>j'upload le dossier UpdateMonitor pour povoir l'analyser sur ma machine kali : <br />
+<img alt="" src="img/Pasted_image_20260423191137.png" /></p>
+<p>en analysant ce fichier j'ai remarqué que plusieurs fois je voyais le même fichier .zip : <br />
+<img alt="" src="img/Pasted_image_20260423191738.png" /><br />
+Après l'analyse j'ai vu que la même action se répète</p>
+<p>l'attaque commence a se déssiner comme pour faire la maj cette tâche cherche un fichier .zip et après va extraire le .zip pour un fichier .dll on va faire un Dll Hijacking, on va crée le reverse shell le mettre dans le .zip et après on va mettre .dll dans un .zip</p>
+<p>création du reverse dans le fichier .dll : <br />
+<img alt="" src="img/Pasted_image_20260423193059.png" /></p>
+<p>l'ajout du fichier .dll dans le fichier .zip<br />
+<img alt="" src="img/Pasted_image_20260423193202.png" /></p>
+<p>j'ai ouvert le port d'écoute : <br />
+<img alt="" src="img/Pasted_image_20260423193248.png" /></p>
+<p>Upload de notre fichier .zip <br />
+<img alt="" src="img/Pasted_image_20260423193633.png" /></p>
+<p>je vois mon shell dans le port d'écoute : <br />
+<img alt="" src="img/Pasted_image_20260423193713.png" /></p>
+<p>l'utilisateur avec lequel je me suis co : <br />
+<img alt="" src="img/Pasted_image_20260423194657.png" /></p>
+<p>Récupération du flag user : <br />
+<img alt="" src="img/Pasted_image_20260423204245.png" /></p>
+<p>j'ai intallé Rubeus.exe sur ma session kali actuelle et après je j'ai upload avec ma session Evil-WinRM<br />
+<img alt="" src="img/Pasted_image_20260423194513.png" /></p>
+<p>Avec ma session Jayleen je lance ./Rubeus.exe, j'ai demandé au contrôleur de domaine de me faire un TGT pour me co a un service distant (un TGT délégable) et après que le TGT a été préparé par le controleur de domaine Rubeus a intercepté ce ticket <br />
+<img alt="" src="img/Pasted_image_20260423194821.png" /></p>
+<p>je mets ce hash en base 64 dans un fichier sur ma kali : <br />
+<img alt="" src="img/Pasted_image_20260423195913.png" /></p>
+<p>je demande a mon kali d'utiliser ce nv fichier par défaut <br />
+<img alt="" src="img/Pasted_image_20260424201811.png" /></p>
+<p>j'utilise le script ticketconverter (que j'ai trouvé sur github) pour convertir le fichier du hash en ccache : <br />
+<img alt="" src="img/Pasted_image_20260423200051.png" /></p>
+<p>Avec cette commande j'énumère les certificats dans l'AD avec l'outil certipy qui est un scanner spécialisé dans la recherche de failles liées a L'ADCS<br />
+<img alt="" src="img/Pasted_image_20260424203611.png" /><br />
+Le résultat de la commande c'est un fichier .txt que je peux utilisée pour savoir qu'elle porte dérobée je peux attaqué pour faire une escalade de privilèges </p>
+<p>j'ai cherché dans le fichier .txt le mot 'Vulnerabilities' et 'vulnerability'<br />
+<img alt="" src="img/Pasted_image_20260425150551.png" /><br />
+Pour 'Vulnerabilites' je n'ai rien trouvé et pour 'vulnerability' le résultat n'est pas concluant donc je me suis dit je vais affiché tout le fichier pour rechercher manuellement : </p>
+<p>le modèle mal configuré est 'UpdateSrv' <br />
+<img alt="" src="img/Pasted_image_20260425153055.png" /></p>
+<p>C'est sur true ça veut dire que le serveur me laisse choisir le nom qui sera écrit sur le certificat.<br />
+<img alt="" src="img/Pasted_image_20260425152851.png" /></p>
+<p>y a le domaine IT qui est le groupe de jaylee donc je peux demander ce certificat <br />
+<img alt="" src="img/Pasted_image_20260425152919.png" /></p>
+<p>Donc avec cette capture on voit que le badge sert uniquement a prouver qu'on est une machine donc on ne pourra pas faire l'attaque classique ESC1 (se connecter en tant qu'Administrateur) <br />
+<img alt="" src="img/Pasted_image_20260425154716.png" /></p>
+<p>Donc après le résultat de ces commandes, j'ai trouvé le modèle UpdateSrv qui d'après nos résultats est un modéle de badge défectueux (la fameuse faille <em>Enrollee Supplies Subject : True</em>) qui nous permet de taper nous mêmes le nom qui sera imprimé sur le badge et comme on pourra pas demander au nom de l'Administrateurs on va la demander au nom du DC01$ car ce n'est pas un utilisateur</p>
+<p>j'export le jaylee.ccache pour le charger en mémoire et se co avec avec l'option -k et -no-pass : <br />
+<img alt="" src="img/Pasted_image_20260425165629.png" /></p>
+<p>je remet l'heure exacte de la machine cible (pour être sur)<br />
+<img alt="" src="img/Pasted_image_20260425165733.png" /></p>
+<p>le nom de la machine, on l'a vu précédemment certipy.txt :<br />
+<img alt="" src="img/Pasted_image_20260425170010.png" /></p>
+<p>Pareil pour le nom de l'Autorité de certification (CA) <br />
+<img alt="" src="img/Pasted_image_20260425170046.png" /></p>
+<p>Avec toutes les infos qu'on a collecté précédemment, on a pu exécuter cette commande, pour créerr le badge au nom du WSUS (wsus.logging.htb) : <br />
+<img alt="" src="img/Pasted_image_20260425171748.png" /></p>
+<p>On extrait le certificat en format texte, on extrait la clé en format texte et après on copie le texte des deux fichiers dans le fichier wsus.pem car le .pfx est un format windows et non pas linux et j'ai était obligé de faire ces commandes pour utiliser le fichier .pem pour notre faux serveur <br />
+<img alt="" src="img/Pasted_image_20260425172818.png" /></p>
+<p>Avec cette commande je fais une attaque d'<strong>Empoisonnement DNS (DNS Poisoning)</strong>, j'utilise les droits de Jaylee avec ticket kerberos, je force de le Contrôleur de Domaine à rediriger tout le traffic destiné au serveur de maj directement vers ma machine kali<br />
+<img alt="" src="img/Pasted_image_20260425173632.png" /></p>
+<p>Vérification que le serveur de maj a bien été modifié : <br />
+<img alt="" src="img/Pasted_image_20260425173959.png" /><br />
+On voit bien mon IP</p>
+<p>on crée une bulle venv on rentre dedans et on installe wsuks : <br />
+<img alt="" src="img/Pasted_image_20260425175904.png" /></p>
+<p>Comme le rôle de <strong>WSUS</strong> est de télécharger les maj de Windows et après dans une entreprise tout les pc se connectent à ce serveur pour télécharger récupérer les maj windows et surout les ordinateus exécutent ces maj avec les droits absolus (SYSTEM)</p>
+<p>On lance notre faux serveur et on lance la commande 'Add-ADGroupMember -Identity "Domain Admins" -Members "MSA_HEALTH$"' pour demander a PowerShell de rajouter msa_health au Domain Admins<br />
+<strong>l'outil WSUKS est pour lancer un faux serveur</strong> qui remplace le vrai serveur Wsus <br />
+<img alt="" src="img/Pasted_image_20260425181522.png" /><br />
+Après cette commande l'utilisateur msa_health$ aura les droits system </p>
+<p>Donc on relance un nouveau Evil-Winrm avec ces droits maj : <br />
+<img alt="" src="img/Pasted_image_20260425182841.png" /></p>
+<p>le flag root ne se trouve pas dans le Desktop de l'Administrators <br />
+<img alt="" src="img/Pasted_image_20260425182454.png" /><br />
+mais dans celui de Toby <br />
+<img alt="" src="img/Pasted_image_20260425182525.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

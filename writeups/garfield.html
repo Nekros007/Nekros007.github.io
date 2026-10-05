@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox Garfield par Mohamed GAIGI (Nekros00).">
+<title>Garfield · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>Garfield</h1><div class="meta"><span class="os-win">● Windows</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260408130426.png" /><br />
+nmap de l'ip de la machine de Garfiled, où on voit le port DNS (53),Kerberos (88), SMB (445), LDAP (398/636)<br />
+ on voit aussi les ports WinRM (5985), RDP (3389)</p>
+<p><img alt="" src="img/Pasted_image_20260408130941.png" /><br />
+avec cette commande je teste l'accés aux dossiers partagés avec NetExec, pour voir si j'ai un droit si oui si Read ou Read/Write </p>
+<p><img alt="" src="img/Pasted_image_20260408132414.png" /><br />
+J'ai fais cette commande pour voir si je peux me co a avec les crédentiels que j'ai avec WimRM ou non, je vois pas de Pwn3d en vert donc je peux pas </p>
+<p><img alt="" src="img/Pasted_image_20260408132627.png" /><br />
+j'ai fais cette commande pour cartographier L'AD avec l'outil BloodHound</p>
+<p>j'ai voulu savoir un l'utilisateur que j'avais avait un chemin direct avec le domaine admin, mais sans résultat <br />
+<img alt="" src="img/Pasted_image_20260409122359.png" /></p>
+<p>je pivote, j'essaye de voir si je peux trouver des dossiers intéressant avec l'outil NetExec dans sysvol <br />
+<img alt="" src="img/Pasted_image_20260409122516.png" /></p>
+<p>le seul fichier que j'ai trouvé de 'suspect' est celui la <br />
+<img alt="" src="img/Pasted_image_20260409122707.png" /><br />
+printerDectect.bat mais après l'avoir analysé c'est juste un rabbit hole</p>
+<p>je pivote je vais essayer de j'ai essayé de recherché sur BloodHound si y avait des AS-REP Roastable Users ou des Kerberoastable Users mais sans résultats.</p>
+<p><img alt="" src="img/Pasted_image_20260409123908.png" /><br />
+Avec cette commande j'utilise l'outil NetExec qui demande au protocole ldap d'énumérer tout les users et leur description, ce que je trouve intéressant dans cette capture la trouvaille du users l.wilson avec un compte utilisateur et un autre compte admin avec plus de privilèges </p>
+<p><img alt="" src="img/Pasted_image_20260409130041.png" /><br />
+sur l'outil BloodHound je viens de voir que l'utilisateur fait parti du groupe IT support <br />
+<img alt="" src="img/Pasted_image_20260409130504.png" /><br />
+mais comme notre utilisateur le groupe n'a aucun droit d'exécution </p>
+<p>je pivote pour voir si l'utilisateur avec lequel je suis co peut modifier les chemins de connexions des users<br />
+<img alt="" src="img/Pasted_image_20260409131624.png" /><br />
+dans les résultats de cette commande j'ai eu ce compte<br />
+<img alt="" src="img/Pasted_image_20260409131740.png" /><br />
+le compte Wilson avec les droits admin </p>
+<p>création du reverse shell <br />
+<img alt="" src="img/Pasted_image_20260409134607.png" /></p>
+<p>(j'ai modifié l'adresse ip)</p>
+<p>génération du payload reverse shell <br />
+<img alt="" src="img/Pasted_image_20260409151940.png" /></p>
+<p>Création du fichier printerDetect.bat (pour remplacer celui que j'avais trouvé dans le dossier script), avec le payload qui a été généré <br />
+<img alt="" src="img/Pasted_image_20260409152004.png" /></p>
+<p>remplacement du fichier printeDetect.bat avec le mien qui contient le payload<br />
+<img alt="" src="img/Pasted_image_20260409152027.png" /></p>
+<p>modification du scriptpath, le fichier que va chercher windows quand l'utilisateur Wilson va se co : <br />
+<img alt="" src="img/Pasted_image_20260409152042.png" /></p>
+<p>écoute la connexion entrante <br />
+<img alt="" src="img/Pasted_image_20260409135415.png" /></p>
+<p>l'utilisateur l.wilson vient de se connecter <br />
+<img alt="" src="img/Pasted_image_20260409152104.png" /></p>
+<p>changement du mot de passe de l.wilson_adm <br />
+<img alt="" src="img/Pasted_image_20260409152507.png" /></p>
+<p>Connection depuis ma kali a l'utilisateur l.wilson_adm avec le nv mdp, (pour  voir si c'est possible ou non d'ouvrir un shell intéractif)<br />
+<img alt="" src="img/Pasted_image_20260409152541.png" /><br />
+j'ai Pwn3d donc c'est possible d'avoir un shell intéractif </p>
+<p>Pour avoir un shell interactif sur la session de l'utilisateur <br />
+<img alt="" src="img/Pasted_image_20260409153016.png" /></p>
+<p>récupération du flag user<br />
+<img alt="" src="img/Pasted_image_20260409153124.png" /></p>
+<p>vérification des groupes et des privilèges de wilson_adm : <br />
+<img alt="" src="img/Pasted_image_20260410114827.png" /><br />
+le plus important a retenir ici c'est le groupe 'GARFIELD\Tier 1', en générale Tier 1 ça veut dire que les membres du groupe peuvent géré les serveurs membres et peuvent avoir des droits spéciaux sur certains objet AD et le privilège  'SeMachineAccountPrivilege' qui permet de rajouter des machines au domaines et de crée un faux compte machine </p>
+<p><img alt="" src="img/Pasted_image_20260410120408.png" /><br />
+Sur cette capture on voit les objets qu'on peut contrôler avec l'utilisateur wilson_adm</p>
+<p>On rajoute le membre wilson dans le groupe<br />
+<img alt="" src="img/Pasted_image_20260410120800.png" /></p>
+<p>avec cette commande on découvre l'adresse ip de RODC01 <br />
+<img alt="" src="img/Pasted_image_20260410122113.png" /></p>
+<p>installation de ligolo et lancement du serveur <br />
+<img alt="" src="img/Pasted_image_20260410124600.png" /></p>
+<p>installation de l'agent ligolo <br />
+<img alt="" src="img/Pasted_image_20260410124639.png" /></p>
+<p>Upload de l'agent ligolo depuis ma kali<br />
+<img alt="" src="img/Pasted_image_20260410124829.png" /></p>
+<p>lancement de l'agent que je viens de télécharger<br />
+<img alt="" src="img/Pasted_image_20260410125828.png" /></p>
+<p>lancement du tunnel <br />
+<img alt="" src="img/Pasted_image_20260410130822.png" /></p>
+<p>rajout de la route vers le réseau internet pour pouvoir directement ping RODC01 <br />
+<img alt="" src="img/Pasted_image_20260410131144.png" /></p>
+<p>On crée un faux compte machine <br />
+<img alt="" src="img/Pasted_image_20260410133004.png" /></p>
+<p>Maintenant on autorise FAKE$ a déléguer vers ROCDC01<br />
+<img alt="" src="img/Pasted_image_20260410133219.png" /></p>
+<p>Synchronisation pour avoir le même temps que la machine cible et pouvoir demande un st pour le service cifs (partage de fichiers)<br />
+<img alt="" src="img/Pasted_image_20260410134427.png" /></p>
+<p>exportation du ticket Kerberos pour dire aux outils sur linux que le ticket ne se trouve pas à son emplacement par défaut mais dans .ccache (on indique juste le chemin)<br />
+Impacket-psexec pour obtenir un shell sur une machine Windows distante (le connexion se fait grâce a notre ticket Kerberos forgé précédemment)<br />
+<img alt="" src="img/Pasted_image_20260410140546.png" /></p>
+<p>Upload de mimikatz sur RODC01 depuis notre serveur<br />
+<img alt="" src="img/Pasted_image_20260410142742.png" /></p>
+<p>Lancement de mimikatz et pour avoir 'SeDebugPrivilege' qui va permettre a mimikatz de lire la mémoire des autres procéssus<br />
+<img alt="" src="img/Pasted_image_20260410142918.png" /></p>
+<p>lancement de cette commandes pour récupérer la valeur d'aes256 et forger un goldent ticket : <br />
+<img alt="" src="img/Pasted_image_20260410143830.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260410143734.png" /></p>
+<p>Upload de Powerview depuis mon serveur/ importation de PowerView (pur charger le script en mémoire qu'on puisse utilsier ses fonctions comme 'Set-DomainObject') / modification de l'attribut 'msDS-RevealOnDemandGroup' de RODC01 pour autoriser la réplication du mdp Administrator vers ce RODC<br />
+<img alt="" src="img/Pasted_image_20260410144559.png" /></p>
+<p>Récupération de Rubeus depuis mon serveur <br />
+<img alt="" src="img/Pasted_image_20260410144951.png" /></p>
+<p>Pour forger le golden ticket <br />
+<img alt="" src="img/Pasted_image_20260410152807.png" /></p>
+<p>Cette commande présente notre Golden Ticket a DC01 lui demande un vrai ticket légitime <br />
+<img alt="" src="img/Pasted_image_20260410152918.png" /><br />
+<img alt="" src="img/Pasted_image_20260410153147.png" /><br />
+le Hash été dans le résultat de la commande précédente </p>
+<p>On se co avec l'outil evil-winrm a la session de d'Administrator grâce au hash récupéré<br />
+<img alt="" src="img/Pasted_image_20260410153131.png" /></p>
+<p>Après s'être connecté a la session d'Administrator je suis parti dans desktop pour lire le fichier root.txt et copier le flag root<br />
+<img alt="" src="img/Pasted_image_20260410153323.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>

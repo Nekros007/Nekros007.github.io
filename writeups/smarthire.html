@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Write-up HackTheBox SmartHire par Mohamed GAIGI (Nekros00).">
+<title>SmartHire · Write-up HTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#0a0e12;--bg-elev:#11161c;--bg-elev2:#161d25;--border:#202c36;
+--border-bright:#2c3d49;--text:#c9d4dc;--text-dim:#728593;--text-faint:#4a5964;
+--accent:#5a9fdd;--brand:#1B4F9B;--accent-2:#6fb3f3;--accent-3:#ff6b8a;--warn:#ffb454;--crit:#ff5f6b;
+--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;--sans:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(90,159,221,.08),transparent 60%),linear-gradient(var(--bg),var(--bg));background-attachment:fixed;}
+a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+::selection{background:rgba(27,79,155,.5);color:#fff}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:0;z-index:20;background:rgba(10,14,18,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:820px;margin:0 auto;padding:12px 20px;display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:13px}
+.nav-in a{color:var(--text-dim)}.nav-in a:hover{color:var(--accent);text-decoration:none}
+header.hd{padding:46px 0 26px;border-bottom:1px solid var(--border);margin-bottom:30px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.eyebrow::before{content:"// ";color:var(--text-faint)}
+h1{font-family:var(--mono);font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:-.5px;margin:0 0 12px;color:var(--text);text-wrap:balance}
+.meta{font-family:var(--mono);font-size:13px;color:var(--text-dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.meta .os-win{color:var(--accent)}.meta .os-lin{color:var(--accent-2)}
+.meta .chip{color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+article h1{font-size:24px;margin:34px 0 6px}
+article h2{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text);margin:36px 0 6px;padding-top:10px;border-top:1px solid var(--border)}
+article h3{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent);margin:26px 0 4px}
+article h4{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-dim);margin:20px 0 2px}
+article p{margin:12px 0}
+article ul,article ol{padding-left:22px;margin:12px 0}article li{margin:5px 0}
+article img{max-width:100%;border:1px solid var(--border-bright);border-radius:8px;margin:14px 0;display:block}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg-elev2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent-2)}
+pre{background:#0c1116;border:1px solid var(--border-bright);border-radius:9px;padding:16px 18px;overflow-x:auto;margin:16px 0}
+pre code{background:none;border:none;padding:0;color:#c9d4dc;font-size:13px;line-height:1.6}
+blockquote{margin:16px 0;padding:12px 16px;background:var(--bg-elev2);border:1px solid var(--border);border-left:3px solid var(--warn);border-radius:8px;color:var(--text-dim)}
+blockquote p{margin:4px 0}
+table{border-collapse:collapse;width:100%;margin:16px 0;font-size:14px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+th{background:var(--bg-elev2);font-family:var(--mono);color:var(--accent);font-weight:600}
+tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+hr{border:none;border-top:1px solid var(--border);margin:26px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:8px}
+.wu{display:block;background:var(--bg-elev);border:1px solid var(--border);border-radius:10px;padding:18px 20px;color:inherit}
+.wu:hover{border-color:var(--accent);text-decoration:none}
+.wu-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.wu-name{font-family:var(--mono);font-weight:600;font-size:17px;color:var(--text)}
+.wu .chip{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(90,159,221,.12);border:1px solid rgba(90,159,221,.38);border-radius:5px;padding:2px 9px}
+.wu .m{font-family:var(--mono);font-size:12px;color:var(--text-dim)}.wu .m .os-lin{color:var(--accent-2)}.wu .m .os-win{color:var(--accent)}
+.wu p{color:var(--text-dim);font-size:14px;margin:8px 0 0}
+footer{padding:34px 20px 50px;text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:12px;border-top:1px solid var(--border);margin-top:40px}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+<nav><div class="nav-in"><a href="../index.html">← portfolio</a><a href="index.html">./writeups</a></div></nav>
+<header class="hd wrap"><p class="eyebrow">write-up</p><h1>SmartHire</h1><div class="meta"><span class="os-lin">● Linux</span><span class="chip">retired</span></div></header><article class="wrap"><p><img alt="" src="img/Pasted_image_20260523183536.png" /><br />
+2 ports ouverts le 22 (ssh) et le 80 (http) </p>
+<p>le site internet : <br />
+<img alt="" src="img/Pasted_image_20260523183847.png" /></p>
+<p>je cherche les sous domaines cachés avec ffuf : <br />
+<img alt="" src="img/Pasted_image_20260523191601.png" /><br />
+le sous domaine que j'ai trouvé :<br />
+<img alt="" src="img/Pasted_image_20260523191651.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260523192205.png" /></p>
+<p>je cherche les dossiers ou fichiers cachés : <br />
+<img alt="" src="img/Pasted_image_20260523191956.png" /><br />
+<img alt="" src="img/Pasted_image_20260523193756.png" /><br />
+<img alt="" src="img/Pasted_image_20260523193815.png" /></p>
+<p>je me suis crée un compte : <br />
+<img alt="" src="img/Pasted_image_20260523194142.png" /></p>
+<p>après m'être inscrit je peux accéder au dashboard : <br />
+<img alt="" src="img/Pasted_image_20260523194424.png" /><br />
+<img alt="" src="img/Pasted_image_20260523195221.png" /><img alt="" src="img/Pasted_image_20260523195231.png" /><br />
+Comme on le voit sur ces images on a 2 tools dispo sur le site : <br />
+<strong>Train model</strong> : on upload un fichier .csv<br />
+<strong>Make predictions</strong> : on upload un cv</p>
+<p>Comme site propose d'upload un fichier csv et nous donne un exemples on va essayer d'upload pour voir le résultat :<br />
+l'exmple que le site montre : <br />
+<img alt="" src="img/Pasted_image_20260523195730.png" /><br />
+mon fichier csv : <br />
+<img alt="" src="img/Pasted_image_20260523201755.png" /></p>
+<p>le résultat après l'upload du fichier .csv sur le site : <br />
+sur le site :<br />
+<img alt="" src="img/Pasted_image_20260525123529.png" /><br />
+sur Burp : <br />
+<img alt="" src="img/Pasted_image_20260525123536.png" /></p>
+<p>comme on le voit sur la capture le serveur nous donne trop d'informations qui devrait pas nous donner car on est des simples utilisateurs   </p>
+<p>j'ai fait la 2e étape, make predictions et j'ai upload le même fichier csv : <br />
+<img alt="" src="img/Pasted_image_20260525135009.png" /></p>
+<p>maintenant j'ai vu si le site est susceptible a une injection en modifiant cette ligne : <br />
+<img alt="" src="img/Pasted_image_20260525140020.png" /><br />
+j'ai rajouté un <strong>'</strong> après le mot python pour voir si le serveur continue de lire le fichier ou bug après cette apostrophe <br />
+<img alt="" src="img/Pasted_image_20260525140827.png" /><br />
+malheureusement le serveur me répond avec un 200 ok donc ça nous dit que l'appli utilise un parseur csv robuste et que la faille n'est pas ici (sinon j'aurais eu un 500 internal).</p>
+<p>j'ai essayé de voir mon cookie de session pour voir si je peux modifier des cases (par exemples mettre admin=true et faire de escalation de privilèges), mais en voyant ces caractères spéciaux on comprend que le jeton <br />
+<img alt="" src="img/Pasted_image_20260525143426.png" /></p>
+<p>j'ai voulu voir la réponse du seveur quand je vais sur le sous domaine que j'ai trouvé <strong>models</strong> : <br />
+<img alt="" src="img/Pasted_image_20260525150242.png" /><br />
+on voit que cette appli utilise mlflow et cette phrase <strong>WWW-Authenticate: Basic realm="mlflow"</strong> nous confirme que le sous domaine utilise le mécanisme <strong>Http Basic Authentification</strong> </p>
+<p>grâce a la documentation de mlflow j'ai pu retrouver le chemin des registered models : <br />
+<img alt="" src="img/Pasted_image_20260525192409.png" /></p>
+<p><img alt="" src="img/Pasted_image_20260525192256.png" /><br />
+<strong>-l : login<br />
+-P : pasword list<br />
+-s : service port<br />
+-t 10 : threads (nb de tâches en parallèle, ici 10 requêtes en même temps)<br />
+-f : found (hydra s'arrête dés qu'il trouve le mdp)</strong><br />
+<img alt="" src="img/Pasted_image_20260525172400.png" /></p>
+<p>grâce a hydra et aux résultats précédents j'ai pu me co a mflow <br />
+<img alt="" src="img/Pasted_image_20260525192930.png" /><br />
+on voit la version utilisé<br />
+<img alt="" src="img/Pasted_image_20260525194146.png" /><br />
+j'ai trouvé cette cve sur Sploitus qui nous explique que fait exactement la cve : <br />
+1- liste le models existants via l'api de mlflow.<br />
+2- envoi une requête http put vers le serveur de stockage des fichiers (artefacts), le script écrase le vrai fichier du modéle "model/python_model.pkl" par un fichier malveillant généré en local qui contient une commande système (comme une demande de reverse shell)<br />
+3- Le script envoi une requête vers l'application web principale (le site web qui analyse les cv) et donc quand le site va vouloir utiliser le modéle il va appellé la fonction vulnérable "load_model()"</p>
+<p>je suis le repot du github pour exploiter la faille : <br />
+<img alt="" src="img/Pasted_image_20260525200059.png" /><br />
+<img alt="" src="img/Pasted_image_20260525200120.png" /><br />
+lancement de l'exploit : <br />
+<img alt="" src="img/Pasted_image_20260525200152.png" /><br />
+je vois ma session sur necat :<br />
+<img alt="" src="img/Pasted_image_20260525200225.png" /><br />
+récupération du flag user : <br />
+<img alt="" src="img/Pasted_image_20260525200305.png" /></p>
+<p>Analyse de l'utilisateur : <br />
+<img alt="" src="img/Pasted_image_20260527210700.png" /></p>
+<p>je regarde si il peut exécuter quelques commandes avec les privilèges root <br />
+<img alt="" src="img/Pasted_image_20260527210857.png" /><br />
+analyse du script : <br />
+<img alt="" src="img/Pasted_image_20260527214529.png" /><br />
+le but de ce script c'est de gérer le service MLFLOW comme on le voit sur la capture on peut voir le status, redémarrer et sauvegarder  mais ce qui nous intéresse nous c'est que le script va regarder dans le dossier /opt/tools/mlflow_ctl/plugins/ pour voir si y a des plugins et il va les importer.</p>
+<p>On a aussi la fonction <strong>"site.addsitedir()"</strong> : <br />
+<img alt="" src="img/Pasted_image_20260528193339.png" /><br />
+lorsque cette fonction est appelée, python exécute cet algorithme en arrière plan : <br />
+ 1- liste tous les éléments dans le dossier spécifié<br />
+ 2- ignore tous les fichiers classiques (.py,.txt, .md) et isole ceux dont le nom se termine par l'extension .pth par exemple (patch.pth)<br />
+ 3- pour chaque fichier .pth trouvé il ouvre et lit son contenu (normalement les fichiers .pth comporte des chemins de dossiers)<br />
+ 4- Quand python lit le contenu si c'est un chemin classique exemple (/var/www/) il prend cette chaîne et l'ajoute à sa liste de recherche (sys.path)<br />
+  -si la ligne commence par import, python se dit ce n'est pas un chemin de dossier c'est une instruction donc python utilise sa fonction native <strong>exec()</strong></p>
+<p>ce que l'on va faire maintenant : <br />
+on crée un fichier .pth pour que quand on déclenche le script, python comme il voit que c'est un fichier .pth il lit son contenu et là il va tomer dans notre piège car le contenu du script commence par "import" donc python va croire que c'est une instruction et utilisé exec<br />
+<img alt="" src="img/Pasted_image_20260528201543.png" /><br />
+voila a quoi ressemble le contenu de ce fichier : <br />
+<img alt="" src="img/Pasted_image_20260528201716.png" /><br />
+<strong>import os :</strong> Bibliothèque standard qui permet a un programme python de parler au système linux de la machine<br />
+<strong>os.system() :</strong> prend une chaîne de caractére et l'envoie directement au shell (le terminal) de la machine, comme si je la tapais moi même dans la console <br />
+<strong>cp /bin/bash /tmp/rootbash :</strong> comme c'est root qui va effectuer cette tâche (copier son bash), j'aurais un bash avec les droits root dans le fichier rootbash dans tmp<br />
+<strong>chmod +s /tmp/rootbash :</strong> pour que quand je lane rootbash j'aurais les droits root car avec le +s le système exécutera tout le temps avec les droits de son propriétaire et dans notre cas c'est root le proprio </p>
+<p>lancement du script : <br />
+<img alt="" src="img/Pasted_image_20260528203039.png" /></p>
+<p>pour que bash ne remarque pas que je suis un simple utilisateur et pas root car mon id et 1000 et ici l'id root est 0 : <br />
+<img alt="" src="img/Pasted_image_20260528203531.png" /><br />
+avec cette commande je lance le le fichier rootbash et je rajoute <strong>-p (privileged)</strong> pour forcer root a accepter le +s que j'ai mis dans mon script </p>
+<p>le fichier s'est bien lancé avec les droits root maintenant je récupére le flag root : <br />
+<img alt="" src="img/Pasted_image_20260528204040.png" /></p></article>
+<footer>Mohamed GAIGI · HTB : Nekros00 · <a href="../index.html">retour au portfolio</a></footer>
+</body>
+</html>
